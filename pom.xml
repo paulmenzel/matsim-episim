@@ -8,6 +8,16 @@
 
     <name>MATSim Episim</name>
     <description>Epidemic simulation for MATSim</description>
+    <organization>
+        <name>MATSim-Org</name>
+        <url>https://matsim.org</url>
+    </organization>
+    <inceptionYear>2020</inceptionYear>
+    <licenses>
+        <license>
+            <name>GNU Affero General Public License (AGPL) version 3.0</name>
+        </license>
+    </licenses>
 
     <properties>
         <matsim.version>12.0-SNAPSHOT</matsim.version>
@@ -76,35 +86,43 @@
             <version>4.2.0</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.github.matsim-scenarios</groupId>-->
-<!--            <artifactId>matsim-berlin</artifactId>-->
-<!--            <version>5.4</version>-->
-<!--        </dependency>-->
+        <!-- Needed for high-throughput logging -->
+        <dependency>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>3.4.2</version>
+        </dependency>
+        <!-- Prefix tree for activity matching -->
+        <dependency>
+            <groupId>com.github.ClickerMonkey</groupId>
+            <artifactId>TrieHard</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.collections</groupId>
+            <artifactId>eclipse-collections</artifactId>
+            <version>10.2.0</version>
+        </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.matsim.contrib</groupId>-->
-<!--            <artifactId>common</artifactId>-->
-<!--            <version>${matsim.version}</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.matsim.contrib</groupId>-->
-<!--            <artifactId>analysis</artifactId>-->
-<!--            <version>${matsim.version}</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.matsim.contrib</groupId>-->
-<!--            <artifactId>vsp</artifactId>-->
-<!--            <version>${matsim.version}</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>org.matsim.contrib</groupId>
             <artifactId>vsp</artifactId>
             <version>${matsim.version}</version>
+
+            <exclusions>
+                <!-- This one causes dependency errors and we don't it anyway -->
+                <exclusion>
+                    <groupId>org.matsim.contrib</groupId>
+                    <artifactId>parking</artifactId>
+                </exclusion>
+            </exclusions>
+
         </dependency>
 
         <!-- Include the JUnit testing library.  Not transitive. -->
@@ -124,26 +142,6 @@
             <scope>test</scope>
         </dependency>
 
-
-<!--        <dependency>-->
-<!--            &lt;!&ndash; This is the matsim "freight" contrib: &ndash;&gt;-->
-<!--            <groupId>org.matsim.contrib</groupId>-->
-<!--            <artifactId>freight</artifactId>-->
-<!--            <version>${matsim.version}</version>-->
-
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.slf4j</groupId>-->
-<!--                    <artifactId>slf4j-api</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.slf4j</groupId>-->
-<!--                    <artifactId>slf4j-log4j12</artifactId>-->
-<!--                </exclusion>-->
-
-<!--            </exclusions>-->
-
-<!--        </dependency>-->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
@@ -154,6 +152,18 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>3.3.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>1.23</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>1.23</version>
             <scope>test</scope>
         </dependency>
 
@@ -217,6 +227,17 @@
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                             </transformers>
+                            <filters>
+                                <!-- Avoid signature checking -->
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
@@ -233,6 +254,24 @@
                             <goal>jar</goal>
                         </goals>
                     </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <configuration>
+                    <licenseName>agpl_v3</licenseName>
+                </configuration>
+                <executions>
+<!--                    <execution>
+                        <id>first</id>
+                        <goals>
+                            <goal>update-file-header</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution> -->
                 </executions>
             </plugin>
 
